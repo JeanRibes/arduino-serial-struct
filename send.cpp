@@ -58,14 +58,19 @@ int close_term(void){
         return EXIT_SUCCESS;
 }
 int main(int argc, char** argv){
-    if(argc != 4){
+    if(argc < 4){
 	printf("Usage: ./a.out [r|v|l] address value");
     }
     setup_term();
     cmd_pkt msg;
     msg.c = argv[1][0];
     msg.a = atoi(argv[2]);
-    msg.v = atoi(argv[3]);
+    if(argc > 4){
+	    printf(argv[4]);
+	msg.v = argv[3][1];
+    }else {
+    	msg.v = atoi(argv[3]);
+    }
     printf("%c",start);//start
 //    printf((char*) &msg, sizeof(cmd_pkt));
     printf((char*) &msg);
@@ -74,6 +79,7 @@ int main(int argc, char** argv){
     write(tty_fd, &msg, sizeof(cmd_pkt));
     write(tty_fd, &stop, 1);
     close_term();
+    printf("%c",msg.v);
 }
 
 
