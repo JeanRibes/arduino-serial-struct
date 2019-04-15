@@ -19,7 +19,7 @@ struct termios stdio;
 struct termios old_stdio;
 int tty_fd;
 
-int setup_term(void)
+int setup_term(char** argv)
 {
         tcgetattr(STDOUT_FILENO,&old_stdio);
 
@@ -36,19 +36,8 @@ int setup_term(void)
         fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);       // make the reads non-blocking
 
         memset(&tio,0,sizeof(tio));
-        tio.c_iflag=0;
-        tio.c_oflag=0;
-        tio.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
-        tio.c_lflag=0;
-        tio.c_cc[VMIN]=1;
-        tio.c_cc[VTIME]=5;
 
-        tty_fd=open("/dev/ttyACM0", O_RDWR | O_NONBLOCK);
-        cfsetospeed(&tio,B9600);            // 115200 baud
-        cfsetispeed(&tio,B9600);            // 115200 baud
-
-        tcsetattr(tty_fd,TCSANOW,&tio);
-	//write(tty_fd,&c,1);
+        tty_fd=open(argv[1], O_RDWR | O_NONBLOCK);
 	return 0;
 }
 int close_term(void){
@@ -58,18 +47,18 @@ int close_term(void){
         return EXIT_SUCCESS;
 }
 int main(int argc, char** argv){
-    if(argc < 4){
+    if(argc < 5){
 	printf("Usage: ./a.out [r|v|l] address value");
     }
-    setup_term();
+    setup_term(argv);
     cmd_pkt msg;
-    msg.c = argv[1][0];
-    msg.a = atoi(argv[2]);
-    if(argc > 4){
-	    printf(argv[4]);
-	msg.v = argv[3][1];
+    msg.c = argv[2][0];
+    msg.a = atoi(argv[3]);
+    if(argc > 5){
+	    printf(argv[5]);
+	msg.v = argv[4][10];
     }else {
-    	msg.v = atoi(argv[3]);
+    	msg.v = atoi(argv[4]);
     }
     printf("%c",start);//start
 //    printf((char*) &msg, sizeof(cmd_pkt));
@@ -79,7 +68,7 @@ int main(int argc, char** argv){
     write(tty_fd, &msg, sizeof(cmd_pkt));
     write(tty_fd, &stop, 1);
     close_term();
-    printf("%c",msg.v);
+//    printf("%c",msg.v);
 }
 
 
